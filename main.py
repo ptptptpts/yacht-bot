@@ -7,8 +7,13 @@ class Dice:
     isHold: bool = False
     eye: int = 0
 
+    def reset(self):
+        self.eye = 0
+        self.isHold = False
+
     def roll(self) -> int:
-        self.eye = random.randrange(1, 7)
+        if self.isHold is False:
+            self.eye = random.randrange(1, 7)
         return self.eye
 
     def set_hold(self) -> bool:
@@ -150,10 +155,49 @@ class PointTable:
 
 
 class Player:
-    pointTable: PointTable = PointTable()
+    point_table: PointTable = PointTable()
+    dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
+    roll_count: int
+
+    def round_start(self):
+        for dice in self.dices:
+            dice.reset()
+            dice.roll()
+        self.roll_count = 2
+
+    def roll(self) -> bool:
+        if self.roll_count > 0:
+            self.roll_count -= 1
+            for dice in self.dices:
+                dice.roll()
+            return True
+        else:
+            return False
+
+    def hold(self, number: int):
+        self.dices[number].set_hold()
+
+    def un_hold(self, number: int):
+        self.dices[number].unset_hold()
+
+    def set_point(self, point_type: PointType):
+        self.point_table.set_point(point_type, self.dices)
+
+    def get_point(self) -> int:
+        return self.point_table.get_total_point()
+
+    def get_roll_count(self) -> int:
+        return self.roll_count
+
+    def get_dices(self) -> List[Dice]:
+        return self.dices
+
+    def get_point_table(self) -> PointTable:
+        return self.point_table
 
 
 class Yacht:
+    is_two_player: bool = False
     rounds: int = 0
     currentPlayer: int = 0
     players: List[Player] = [Player(), Player()]
@@ -164,6 +208,9 @@ class Yacht:
         self.players = [Player(), Player()]
 
     def start(self):
+        pass
+
+    def print_round(self):
         pass
 
 
