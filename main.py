@@ -30,6 +30,9 @@ class Dice:
     def get_hold_state(self) -> bool:
         return self.isHold
 
+    def print_dice(self):
+        print("Is Hold: ", self.isHold, ", Eye: ", self.eye)
+
 
 class PointType(Enum):
     ONE = 0
@@ -47,11 +50,14 @@ class PointType(Enum):
 
 
 class PointTable:
-    table: List[int] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+    table_set: List[bool] = [False, False, False, False, False, False, False, False, False, False, False, False]
+    table: List[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     def set_point(self, point_type: PointType, dices: List[Dice]) -> bool:
-        if self.table[point_type.value] is -1:
+        if self.table_set[point_type.value] is False:
             self.table[point_type.value] = 0
+            self.table_set[point_type.value] = True
+
             counts: List[int] = [0, 0, 0, 0, 0, 0]
 
             for dice in dices:
@@ -153,11 +159,16 @@ class PointTable:
 
         return point
 
+    def print_table(self):
+        print("==== PointTable ====")
+        for point_type in PointType:
+            print(point_type, ": ", self.table[point_type.value])
+
 
 class Player:
     point_table: PointTable = PointTable()
     dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
-    roll_count: int
+    roll_count: int = 0
 
     def round_start(self):
         for dice in self.dices:
@@ -180,8 +191,8 @@ class Player:
     def un_hold(self, number: int):
         self.dices[number].unset_hold()
 
-    def set_point(self, point_type: PointType):
-        self.point_table.set_point(point_type, self.dices)
+    def set_point(self, point_type: PointType) -> bool:
+        return self.point_table.set_point(point_type, self.dices)
 
     def get_point(self) -> int:
         return self.point_table.get_total_point()
@@ -195,25 +206,76 @@ class Player:
     def get_point_table(self) -> PointTable:
         return self.point_table
 
+    def print_point(self):
+        print("Total Point: ", self.point_table.get_total_point())
+        self.point_table.print_table()
+
+    def print_dice(self):
+        print("Roll Count: ", self.roll_count)
+        for dice in self.dices:
+            dice.print_dice()
+
 
 class Yacht:
-    is_two_player: bool = False
     rounds: int = 0
-    currentPlayer: int = 0
-    players: List[Player] = [Player(), Player()]
+    player: Player = Player()
 
     def init(self):
         self.rounds = 0
-        self.currentPlayer = 0
-        self.players = [Player(), Player()]
+        self.player = Player()
 
     def start(self):
-        pass
+        self.init()
+        while self.rounds < 12:
+            self.player.round_start()
+            while self.play_round() is False:
+                pass
+            self.rounds += 1
+
+    def play_round(self) -> bool:
+        self.print_round()
+        self.player.print_dice()
+        print("1.Roll")
+        print("2.Hold")
+        print("3.Unhold")
+        print("4.Set Point")
+        user_input = int(input("="))
+        if user_input is 1:
+            self.play_roll()
+        elif user_input is 2:
+            self.play_hold()
+        elif user_input is 3:
+            self.play_unhold()
+        elif user_input is 4:
+            return self.play_set_point()
+        return False
 
     def print_round(self):
-        pass
+        print("Round: ", self.rounds)
+        print("--------------------------------")
+        self.player.print_point()
+
+    def play_roll(self):
+        self.player.roll()
+
+    def play_hold(self):
+        user_input = int(input("Select dice: "))
+        if (user_input >= 0) and (user_input < 5):
+            self.player.hold(user_input)
+
+    def play_unhold(self):
+        user_input = int(input("Select dice: "))
+        if (user_input >= 0) and (user_input < 5):
+            self.player.un_hold(user_input)
+
+    def play_set_point(self) -> bool:
+        user_input = int(input("Select point: "))
+        if (user_input >= 0) and (user_input < 12):
+            return self.player.set_point(PointType(user_input))
+        else:
+            return False
+
 
 
 yacht = Yacht()
-yacht.init()
 yacht.start()
