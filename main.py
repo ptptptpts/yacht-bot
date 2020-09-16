@@ -235,20 +235,23 @@ class Yacht:
     def play_round(self) -> bool:
         self.print_round()
         self.player.print_dice()
-        print("1.Roll")
-        print("2.Hold")
-        print("3.Unhold")
-        print("4.Set Point")
-        user_input = int(input("="))
-        if user_input is 1:
-            self.play_roll()
-        elif user_input is 2:
-            self.play_hold()
-        elif user_input is 3:
-            self.play_unhold()
-        elif user_input is 4:
+        if self.player.roll_count == 0:
             return self.play_set_point()
-        return False
+        else:
+            print("1.Roll")
+            print("2.Hold")
+            print("3.Unhold")
+            print("4.Set Point")
+            user_input = int(input("="))
+            if user_input is 1:
+                self.play_roll()
+            elif user_input is 2:
+                self.play_hold()
+            elif user_input is 3:
+                self.play_unhold()
+            elif user_input is 4:
+                return self.play_set_point()
+            return False
 
     def print_round(self):
         print("Round: ", self.rounds)
@@ -274,7 +277,6 @@ class Yacht:
             return self.player.set_point(PointType(user_input))
         else:
             return False
-
 
 
 yacht = Yacht()
