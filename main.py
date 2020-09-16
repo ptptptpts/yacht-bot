@@ -298,5 +298,10 @@ class Yacht:
 
 
 yacht = Yacht()
-yacht.set_user_game(True)
-yacht.start()
+print("1. Play Self")
+print("2. Play Random Bot")
+print("3. Play AI Bot")
+select = int(input(":"))
+if select == 1:
+    yacht.set_user_game(True)
+    yacht.start()
