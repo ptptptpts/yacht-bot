@@ -221,7 +221,7 @@ class Yacht:
     player: Player = Player()
     user_game: bool = False
 
-    def set_user_game(self, is_user_game:bool):
+    def set_user_game(self, is_user_game: bool):
         self.user_game = is_user_game
 
     def init(self):
@@ -297,11 +297,37 @@ class Yacht:
             return False
 
 
-yacht = Yacht()
+class YachtGamePlayerOne:
+    yacht = Yacht()
+
+    def start(self):
+        self.yacht.set_user_game(True)
+        self.yacht.start()
+
+
+class YachtRandomBot:
+    yacht = Yacht()
+
+    def start(self):
+        self.yacht.set_user_game(True)
+        self.yacht.start()
+
+
+class YachtAiBot:
+    yacht = Yacht()
+
+    def start(self):
+        self.yacht.set_user_game(True)
+        self.yacht.start()
+
+
 print("1. Play Self")
 print("2. Play Random Bot")
 print("3. Play AI Bot")
 select = int(input(":"))
 if select == 1:
-    yacht.set_user_game(True)
-    yacht.start()
+    YachtGamePlayerOne().start()
+elif select == 2:
+    YachtRandomBot().start()
+elif select == 3:
+    YachtAiBot().start()
