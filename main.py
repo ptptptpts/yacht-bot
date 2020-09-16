@@ -219,6 +219,10 @@ class Player:
 class Yacht:
     rounds: int = 0
     player: Player = Player()
+    user_game: bool = False
+
+    def set_user_game(self, is_user_game:bool):
+        self.user_game = is_user_game
 
     def init(self):
         self.rounds = 0
@@ -233,16 +237,20 @@ class Yacht:
             self.rounds += 1
 
     def play_round(self) -> bool:
-        self.print_round()
-        self.player.print_dice()
+        if self.user_game:
+            self.print_round()
+            self.player.print_dice()
         if self.player.roll_count == 0:
             return self.play_set_point()
         else:
-            print("1.Roll")
-            print("2.Hold")
-            print("3.Unhold")
-            print("4.Set Point")
-            user_input = int(input("="))
+            if self.user_game:
+                print("1.Roll")
+                print("2.Hold")
+                print("3.Unhold")
+                print("4.Set Point")
+                user_input = int(input("="))
+            else:
+                user_input = int(input())
             if user_input is 1:
                 self.play_roll()
             elif user_input is 2:
@@ -254,25 +262,35 @@ class Yacht:
             return False
 
     def print_round(self):
-        print("Round: ", self.rounds)
-        print("--------------------------------")
+        if self.user_game:
+            print("Round: ", self.rounds)
+            print("--------------------------------")
         self.player.print_point()
 
     def play_roll(self):
         self.player.roll()
 
     def play_hold(self):
-        user_input = int(input("Select dice: "))
+        if self.user_game:
+            user_input = int(input("Select dice: "))
+        else:
+            user_input = int(input())
         if (user_input >= 0) and (user_input < 5):
             self.player.hold(user_input)
 
     def play_unhold(self):
-        user_input = int(input("Select dice: "))
+        if self.user_game:
+            user_input = int(input("Select dice: "))
+        else:
+            user_input = int(input())
         if (user_input >= 0) and (user_input < 5):
             self.player.un_hold(user_input)
 
     def play_set_point(self) -> bool:
-        user_input = int(input("Select point: "))
+        if self.user_game:
+            user_input = int(input("Select point: "))
+        else:
+            user_input = int(input())
         if (user_input >= 0) and (user_input < 12):
             return self.player.set_point(PointType(user_input))
         else:
@@ -280,4 +298,5 @@ class Yacht:
 
 
 yacht = Yacht()
+yacht.set_user_game(True)
 yacht.start()
