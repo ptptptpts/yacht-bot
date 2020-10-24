@@ -37,6 +37,9 @@ class Player:
     def get_point(self) -> int:
         return self.point_table.get_total_point()
 
+    def is_point_setable(self, point_type: PointType) -> bool:
+        return self.point_table
+
     def get_roll_count(self) -> int:
         return self.roll_count
 

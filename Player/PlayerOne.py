@@ -1,8 +1,8 @@
-from Yacht.Yacht import Yacht
+from Yacht.HumanYacht import HumanYacht
 
 
 class YachtGamePlayerOne:
-    yacht = Yacht()
+    yacht = HumanYacht()
 
     def start(self):
         self.yacht.set_user_game(True)
