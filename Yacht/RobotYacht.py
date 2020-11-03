@@ -15,6 +15,7 @@ class RobotYacht(Yacht):
 
     def start(self):
         self.init()
+        self.current_step = 0
 
     def play_round(self) -> bool:
         return True
@@ -31,7 +32,7 @@ class RobotYacht(Yacht):
                 self.rounds += 1
 
     def get_game_status(self) -> []:
-        # Build game status on list
+        # Build game status on list[20]
         # round : integer 0 - 11
         # step  : integer 0 - 4
         # point [12] : bool, integer
@@ -46,19 +47,25 @@ class RobotYacht(Yacht):
         status.append(self.player.get_point())
         return status
 
+    def get_player_point(self) -> int:
+        return self.player.get_point()
+
     def is_game_finish(self) -> bool:
         return self.rounds == 12
 
     def get_input(self, robot_input: int):
         if self.current_step == 0:
+            self.player.round_start()
             self.__hold_dice(robot_input)
         elif self.current_step == 1:
             self.__unhold_dice(robot_input)
         elif self.current_step == 2:
+            self.play_roll()
             self.__hold_dice(robot_input)
         elif self.current_step == 3:
             self.__unhold_dice(robot_input)
         elif self.current_step == 4:
+            self.play_roll()
             self.__select_point(robot_input)
 
     def __hold_dice(self, hold_bit: int):
@@ -74,5 +81,6 @@ class RobotYacht(Yacht):
             unhold_bit = unhold_bit >> 1
 
     def __select_point(self, point_select: int):
+        point_select = point_select % 12
         while not self.player.set_point(PointType(point_select)):
             point_select = (point_select + 1) % 12

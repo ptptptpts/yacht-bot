@@ -6,8 +6,7 @@ class HumanYacht (Yacht):
     def start(self):
         self.init()
         while self.rounds < 12:
-            self.player.round_start()
-            while self.play_round(0) is False:
+            while self.play_round() is False:
                 pass
             self.rounds += 1
 

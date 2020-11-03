@@ -34,17 +34,12 @@ class Yacht:
         elif select is 3:
             self.play_unhold()
         elif select is 4:
-            return self.play_set_point(point_select)
+            return self.play_set_point()
         return False
 
     def _run_set_point(self, point_select: int):
         point_select = point_select % 12
         self.player.set_point(PointType(point_select))
-
-    def print_round(self):
-        print("Round: ", self.rounds)
-        print("--------------------------------")
-        self.player.print_point()
 
     def play_roll(self):
         self.player.roll()
@@ -67,3 +62,11 @@ class Yacht:
 
     def set_user_game(self, is_user_game: bool):
         self.user_game = is_user_game
+
+    def print_round(self):
+        print("Round: ", self.rounds)
+        print("--------------------------------")
+        self.player.print_point()
+
+    def print_dice(self):
+        self.player.print_dice()
