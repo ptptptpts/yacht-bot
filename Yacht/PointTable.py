@@ -60,11 +60,11 @@ class PointTable:
                 is_two_matched: bool = False
 
                 for eye in range(1, 7):
-                    if counts[eye - 1] is 3:
+                    if counts[eye - 1] == 3:
                         is_three_matched = True
-                    elif counts[eye - 1] is 2:
+                    elif counts[eye - 1] == 2:
                         is_two_matched = True
-                    elif counts[eye - 1] is 5:
+                    elif counts[eye - 1] == 5:
                         is_three_matched = True
                         is_two_matched = True
                 if (is_three_matched is True) and (is_two_matched is True):
@@ -99,7 +99,7 @@ class PointTable:
 
             elif point_type == PointType.YACHT:
                 for eye in range(1, 7):
-                    if counts[eye - 1] is 5:
+                    if counts[eye - 1] == 5:
                         self.table[point_type.value] = eye * 5
 
             return True

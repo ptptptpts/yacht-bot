@@ -32,7 +32,7 @@ class RobotYacht(Yacht):
                 self.rounds += 1
 
     def get_game_status(self) -> []:
-        # Build game status on list[20]
+        # Build game status on list[32]
         # round : integer 0 - 11
         # step  : integer 0 - 4
         # point [12] : bool, integer
@@ -43,7 +43,7 @@ class RobotYacht(Yacht):
             status.append(self.player.point_table.table_set[point_type.value])
             status.append(self.player.point_table.table[point_type.value])
         for dice in range(5):
-            status.append(self.player.dices[dice])
+            status.append(self.player.dices[dice].get_eye())
         status.append(self.player.get_point())
         return status
 
@@ -70,7 +70,7 @@ class RobotYacht(Yacht):
 
     def __hold_dice(self, hold_bit: int):
         for dice in range(5):
-            if hold_bit & 0b1 == 1:
+            if (hold_bit & 0b1) == 1:
                 self.player.hold(dice)
             hold_bit = hold_bit >> 1
 

@@ -27,13 +27,13 @@ class Yacht:
 
     def _select_round(self, select: int, point_select: int) -> bool:
         select = (select % 4) + 1
-        if select is 1:
+        if select == 1:
             self.play_roll()
-        elif select is 2:
+        elif select == 2:
             self.play_hold()
-        elif select is 3:
+        elif select == 3:
             self.play_unhold()
-        elif select is 4:
+        elif select == 4:
             return self.play_set_point()
         return False
 
