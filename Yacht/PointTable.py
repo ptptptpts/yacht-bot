@@ -8,6 +8,12 @@ class PointTable:
     table_set: List[bool] = [False, False, False, False, False, False, False, False, False, False, False, False]
     table: List[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
+    def __init__(self):
+        for i in range(0, len(self.table_set)):
+            self.table_set[i] = False
+        for i in range(0, len(self.table)):
+            self.table[i] = 0
+
     def set_point(self, point_type: PointType, dices: List[Dice]) -> bool:
         if self.table_set[point_type.value] is False:
             self.table[point_type.value] = 0

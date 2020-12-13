@@ -5,6 +5,10 @@ class Dice:
     isHold: bool = False
     eye: int = 0
 
+    def __init__(self):
+        self.isHold = False
+        self.eye = 0
+
     def reset(self):
         self.eye = 0
         self.isHold = False

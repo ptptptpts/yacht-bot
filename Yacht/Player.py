@@ -10,6 +10,12 @@ class Player:
     dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
     roll_count: int = 0
 
+    def __init__(self):
+        self.point_table = PointTable()
+        self.roll_count = 0
+        for i in range(0, len(self.dices)):
+            self.dices[i] = Dice()
+
     def round_start(self):
         for dice in self.dices:
             dice.reset()

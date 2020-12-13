@@ -3,7 +3,7 @@ import random
 
 
 class YachtRandomBot:
-    __debug = True
+    __debug = False
     __yacht = RobotYacht()
 
     __avg_score = 0

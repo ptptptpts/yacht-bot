@@ -16,6 +16,6 @@ select = int(input(":"))
 if select == 1:
     YachtGamePlayerOne().start()
 elif select == 2:
-    YachtRandomBot().start(2)
+    YachtRandomBot().start(100)
 elif select == 3:
     YachtAiBot().start()
