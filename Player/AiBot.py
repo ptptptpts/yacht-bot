@@ -23,6 +23,8 @@ class YachtAiBot:
     __play_num = 100
     __data_size = 10
 
+    __input_size = 5
+
     def start(self):
         self.__init_self()
         model = self.__build_model()
@@ -31,7 +33,7 @@ class YachtAiBot:
         self.__train_model(model, training_set)
 
         def predictors(s):
-            x_array = np.array(s).reshape(-1, 32)
+            x_array = np.array(s).reshape(-1, self.__input_size)
             x_array = np.asarray(x_array).astype('float32')
             return int(model.predict(x_array)[0])
 
@@ -57,6 +59,7 @@ class YachtAiBot:
     def __data_preparation(self, play_num, data_size, ai_func):
         game_data = []
         for i in range(play_num):
+            print("Play " + str(i) + " round")
             score = 0
             game_steps = []
             self.__yacht.start()
@@ -85,14 +88,14 @@ class YachtAiBot:
 
     def __build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=32, activation='relu'))
-        model.add(Dense(16, activation='relu'))
+        model.add(Dense(128, input_dim=self.__input_size, activation='relu'))
+        model.add(Dense(32, activation='relu'))
         model.add(Dense(1, activation='softmax'))
         model.compile(loss='mse', optimizer=Adam())
         return model
 
     def __train_model(self, model, training_set):
-        x_array = np.array([i[0] for i in training_set]).reshape(-1, 32)
+        x_array = np.array([i[0] for i in training_set]).reshape(-1, self.__input_size)
         x_array = np.asarray(x_array).astype('float32')
         y_array = np.array([i[1] for i in training_set]).reshape(-1, 1)
         y_array = np.asarray(y_array).astype('float32')
