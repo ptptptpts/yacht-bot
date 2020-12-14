@@ -64,7 +64,7 @@ class YachtAiBot:
             game_steps = []
             self.__yacht.start()
             while not self.__yacht.is_game_finish():
-                game_status = self.__yacht.get_game_status()
+                game_status = self.__yacht.get_game_status_float()
                 action = ai_func(game_status)
                 game_steps.append((game_status, action))
                 self.__yacht.play_robot_round(action)
@@ -96,7 +96,5 @@ class YachtAiBot:
 
     def __train_model(self, model, training_set):
         x_array = np.array([i[0] for i in training_set]).reshape(-1, self.__input_size)
-        x_array = np.asarray(x_array).astype('float32')
         y_array = np.array([i[1] for i in training_set]).reshape(-1, 1)
-        y_array = np.asarray(y_array).astype('float32')
         model.fit(x_array, y_array, epochs=10, verbose=0)

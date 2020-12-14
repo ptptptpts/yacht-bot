@@ -33,13 +33,13 @@ class RobotYacht(Yacht):
 
     def get_game_status(self) -> []:
         # Build game status on list[5]
-        # status_bit :
+        # status_bit (MAX 94808)
         #   round : integer 0 - 11
         #   step  : integer 0 - 4
         #   total point : integer
-        # point_bit[3] :
+        # point_bit[3] (MAX 213480165)
         #   point [12] : bool, integer
-        # dice_bit :
+        # dice_bit (MAX 908765)
         #   dice [5] : integer 1 - 6
         status = []
 
@@ -52,7 +52,7 @@ class RobotYacht(Yacht):
             point_bit = 0
             for j in range(4):
                 table = self.player.point_table
-                point_bit = (point_bit << 7) + table.table[i * 4 + j]
+                point_bit = (point_bit << 7) + (table.table[i * 4 + j] << 1)
                 if table.table_set[i * 4 + j]:
                     point_bit += 1
             status.append(point_bit)
@@ -67,6 +67,16 @@ class RobotYacht(Yacht):
         status.append(dice_bit)
 
         return status
+
+    def get_game_status_float(self) -> []:
+        status = self.get_game_status()
+        float_status = [float(status[0]) / float(94808),
+                        float(status[1]) / float(213480165),
+                        float(status[2]) / float(213480165),
+                        float(status[3]) / float(213480165),
+                        float(status[4]) / float(908765)]
+
+        return float_status
 
     def get_player_point(self) -> int:
         return self.player.get_point()
