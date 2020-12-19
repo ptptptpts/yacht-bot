@@ -25,9 +25,12 @@ class YachtAiBot:
     __play_num = 1000
     __data_size = 10
 
-    __input_size = 5
+    __input_size = 14
 
     def start(self):
+        print(tf.config.list_logical_devices('GPU'))
+        print(tf.test.gpu_device_name())
+        print(device_lib.list_local_devices())
         self.__init_self()
         model = self.__build_model()
         training_set = \
@@ -39,18 +42,18 @@ class YachtAiBot:
             x_array = np.asarray(x_array).astype('float32')
             return int(model(x_array, training=False)[0])
 
-        t = time.time()
         for i in range(self.__learning_size):
+            t = time.time()
             self.__init_self()
             print("================================")
             training_set = \
                 self.__data_preparation(self.__play_num, self.__data_size, predictors)
-            # self.__train_model(model, training_set)
+            self.__train_model(model, training_set)
             self.__avg_score = self.__avg_score / self.__play_num
             print("Average score: ", self.__avg_score)
             print("Max score: ", self.__max_score)
             print("Min score: ", self.__min_score)
-        print("Execute time: " + str(time.time() - t))
+            print("Execute time: " + str(time.time() - t))
 
     def __init_self(self):
         self.__avg_score = 0
@@ -88,13 +91,15 @@ class YachtAiBot:
 
     def __build_model(self):
         model = Sequential()
-        model.add(Dense(128, input_dim=self.__input_size, activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(1, activation='softmax'))
+        model.add(Dense(512, input_dim=self.__input_size, activation='relu'))
+        model.add(Dense(128, activation='relu'))
+        model.add(Dense(1, activation='linear'))
         model.compile(loss='mse', optimizer=Adam())
         return model
 
     def __train_model(self, model, training_set):
         x_array = np.array([i[0] for i in training_set]).reshape(-1, self.__input_size)
         y_array = np.array([i[1] for i in training_set]).reshape(-1, 1)
-        model.fit(x_array, y_array, epochs=10, verbose=0)
+        t = time.time()
+        model.fit(x_array, y_array, epochs=1000, verbose=0)
+        print("Training time: " + str(time.time() - t))

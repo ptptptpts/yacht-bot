@@ -47,14 +47,12 @@ class RobotYacht(Yacht):
         status_bit = (self.rounds << 13) + (self.current_step << 10) + self.player.get_point()
         status.append(status_bit)
 
-        # point_bit = ((point value(6bit, 0-50) + point status(1bit, 0-1)) * 4) * 3
-        for i in range(3):
-            point_bit = 0
-            for j in range(4):
-                table = self.player.point_table
-                point_bit = (point_bit << 7) + (table.table[i * 4 + j] << 1)
-                if table.table_set[i * 4 + j]:
-                    point_bit += 1
+        # point_bit = (point value(6bit, 0-50) + point status(1bit, 0-1)) * 12
+        table = self.player.point_table
+        for i in range(12):
+            point_bit = table.table[i] << 1
+            if table.table_set[i]:
+                point_bit += 1
             status.append(point_bit)
 
         # dice_bit = (dice eye(3bit, 1-6) + dice status(1bit, 0-1)) * 5
@@ -71,10 +69,19 @@ class RobotYacht(Yacht):
     def get_game_status_float(self) -> []:
         status = self.get_game_status()
         float_status = [float(status[0]) / float(94808),
-                        float(status[1]) / float(213480165),
-                        float(status[2]) / float(213480165),
-                        float(status[3]) / float(213480165),
-                        float(status[4]) / float(908765)]
+                        float(status[1]) / float(128),
+                        float(status[2]) / float(128),
+                        float(status[3]) / float(128),
+                        float(status[4]) / float(128),
+                        float(status[5]) / float(128),
+                        float(status[6]) / float(128),
+                        float(status[7]) / float(128),
+                        float(status[8]) / float(128),
+                        float(status[9]) / float(128),
+                        float(status[10]) / float(128),
+                        float(status[11]) / float(128),
+                        float(status[12]) / float(128),
+                        float(status[13]) / float(908765)]
 
         return float_status
 
