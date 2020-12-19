@@ -1,4 +1,6 @@
 import random
+import time
+
 import numpy as np
 import tensorflow as tf
 
@@ -20,7 +22,7 @@ class YachtAiBot:
 
     __learning_size = 100
 
-    __play_num = 100
+    __play_num = 1000
     __data_size = 10
 
     __input_size = 5
@@ -35,8 +37,9 @@ class YachtAiBot:
         def predictors(s):
             x_array = np.array(s).reshape(-1, self.__input_size)
             x_array = np.asarray(x_array).astype('float32')
-            return int(model.predict(x_array)[0])
+            return int(model(x_array, training=False)[0])
 
+        t = time.time()
         for i in range(self.__learning_size):
             self.__init_self()
             print("================================")
@@ -47,11 +50,9 @@ class YachtAiBot:
             print("Average score: ", self.__avg_score)
             print("Max score: ", self.__max_score)
             print("Min score: ", self.__min_score)
+        print("Execute time: " + str(time.time() - t))
 
     def __init_self(self):
-        print(tf.test.is_gpu_available())
-        print(tf.test.gpu_device_name())
-        print(device_lib.list_local_devices())
         self.__avg_score = 0
         self.__max_score = 0
         self.__min_score = 400
@@ -59,7 +60,6 @@ class YachtAiBot:
     def __data_preparation(self, play_num, data_size, ai_func):
         game_data = []
         for i in range(play_num):
-            print("Play " + str(i) + " round")
             score = 0
             game_steps = []
             self.__yacht.start()
