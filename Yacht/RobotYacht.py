@@ -32,20 +32,20 @@ class RobotYacht(Yacht):
                 self.rounds += 1
 
     def get_game_status(self) -> []:
-        # Build game status on list[5]
-        # status_bit (MAX 94808)
-        #   round : integer 0 - 11
-        #   step  : integer 0 - 4
-        #   total point : integer
-        # point_bit[3] (MAX 213480165)
+        # Build game status on list[]
+        # round_bit[1] : integer 0 - 11
+        # step_bit[1]  : integer 0 - 4
+        # total point_bit[1] : integer 0-512
+        # point_bit[12] (MAX 128)
         #   point [12] : bool, integer
-        # dice_bit (MAX 908765)
+        # dice_bit[5] (MAX 16)
         #   dice [5] : integer 1 - 6
         status = []
 
         # status_bit = rounds(4bit, 0-11) + current step(3bit, 0-4) + point(10bit, 0-1023)
-        status_bit = (self.rounds << 13) + (self.current_step << 10) + self.player.get_point()
-        status.append(status_bit)
+        status.append(float(self.rounds) / float(11))
+        status.append(float(self.current_step) / float(4))
+        status.append(float(self.player.get_point()) / float(500))
 
         # point_bit = (point value(6bit, 0-50) + point status(1bit, 0-1)) * 12
         table = self.player.point_table
@@ -53,37 +53,21 @@ class RobotYacht(Yacht):
             point_bit = table.table[i] << 1
             if table.table_set[i]:
                 point_bit += 1
-            status.append(point_bit)
+            status.append(float(point_bit) / float(128))
 
         # dice_bit = (dice eye(3bit, 1-6) + dice status(1bit, 0-1)) * 5
-        dice_bit = 0
         for dice in range(5):
             current_dice = self.player.dices[dice]
-            dice_bit = (dice_bit << 4) + (current_dice.get_eye() << 1)
+            dice_bit = current_dice.get_eye() << 1
             if current_dice.get_hold_state():
                 dice_bit += 1
-        status.append(dice_bit)
+            status.append(float(dice_bit) / float(16))
 
         return status
 
     def get_game_status_float(self) -> []:
         status = self.get_game_status()
-        float_status = [float(status[0]) / float(94808),
-                        float(status[1]) / float(128),
-                        float(status[2]) / float(128),
-                        float(status[3]) / float(128),
-                        float(status[4]) / float(128),
-                        float(status[5]) / float(128),
-                        float(status[6]) / float(128),
-                        float(status[7]) / float(128),
-                        float(status[8]) / float(128),
-                        float(status[9]) / float(128),
-                        float(status[10]) / float(128),
-                        float(status[11]) / float(128),
-                        float(status[12]) / float(128),
-                        float(status[13]) / float(908765)]
-
-        return float_status
+        return status
 
     def get_player_point(self) -> int:
         return self.player.get_point()
