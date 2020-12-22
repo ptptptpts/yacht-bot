@@ -22,7 +22,7 @@ class YachtAiBot:
 
     __learning_size = 100
 
-    __play_num = 100
+    __play_num = 10000
     __data_size = 100
 
     __input_size = 20
@@ -37,7 +37,7 @@ class YachtAiBot:
         self.__init_self()
         model = self.__build_model()
         training_set = \
-            self.__data_preparation(self.__play_num, self.__data_size, lambda s: random.randrange(0, 100))
+            self.__data_preparation(self.__play_num, self.__data_size, lambda s: random.randrange(0, 32))
         self.__train_model(model, training_set)
 
         def predictors(s):
@@ -46,7 +46,8 @@ class YachtAiBot:
             output_array = model(x_array, training=False)
             output = 0
             for bit in range(self.__bit_size):
-                output = (output << 1) + int(output_array[0][bit])
+                prob = output_array[0][bit]
+                output = (output << 1) + np.random.binomial(1, prob)
             return output
 
         for i in range(self.__learning_size):
