@@ -25,7 +25,7 @@ class YachtAiBot:
     __play_num = 10000
     __data_size = 100
 
-    __input_size = 20
+    __input_size = 37
     __output_size = 5
 
     __bit_size = 5
@@ -109,8 +109,8 @@ class YachtAiBot:
 
     def __build_model(self):
         model = Sequential()
-        model.add(Dense(128, input_dim=self.__input_size, activation='sigmoid'))
-        model.add(Dense(32, activation='sigmoid'))
+        model.add(Dense(1024, input_dim=self.__input_size, activation='sigmoid'))
+        model.add(Dense(256, activation='sigmoid'))
         model.add(Dense(5, activation='sigmoid'))
         model.compile(loss='mse', optimizer=Adam())
         return model

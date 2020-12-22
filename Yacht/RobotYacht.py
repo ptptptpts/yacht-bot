@@ -32,13 +32,13 @@ class RobotYacht(Yacht):
                 self.rounds += 1
 
     def get_game_status(self) -> []:
-        # Build game status on list[]
+        # Build game status on list[37]
         # round_bit[1] : integer 0 - 11
         # step_bit[1]  : integer 0 - 4
         # total point_bit[1] : integer 0-512
-        # point_bit[12] (MAX 128)
+        # point_bit[24] (MAX 50)
         #   point [12] : bool, integer
-        # dice_bit[5] (MAX 16)
+        # dice_bit[10] (MAX 6)
         #   dice [5] : integer 1 - 6
         status = []
 
@@ -50,18 +50,20 @@ class RobotYacht(Yacht):
         # point_bit = (point value(6bit, 0-50) + point status(1bit, 0-1)) * 12
         table = self.player.point_table
         for i in range(12):
-            point_bit = table.table[i] << 1
+            status.append(float(table.table[i]) / float(50))
             if table.table_set[i]:
-                point_bit += 1
-            status.append(float(point_bit) / float(128))
+                status.append(1)
+            else:
+                status.append(0)
 
         # dice_bit = (dice eye(3bit, 1-6) + dice status(1bit, 0-1)) * 5
         for dice in range(5):
             current_dice = self.player.dices[dice]
-            dice_bit = current_dice.get_eye() << 1
+            status.append(float(current_dice.get_eye()) / float(6))
             if current_dice.get_hold_state():
-                dice_bit += 1
-            status.append(float(dice_bit) / float(16))
+                status.append(1)
+            else:
+                status.append(0)
 
         return status
 

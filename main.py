@@ -1,4 +1,5 @@
 from Player.AiBot import YachtAiBot
+from Player.PercentageBot import YachtPercentageBot
 from Player.PlayerOne import YachtGamePlayerOne
 from Player.RandomBot import YachtRandomBot
 
@@ -13,4 +14,4 @@ from Player.RandomBot import YachtRandomBot
 #     YachtRandomBot().start(100)
 # elif select == 3:
 #     YachtAiBot().start()
-YachtAiBot().start()
+YachtPercentageBot().start(100)
