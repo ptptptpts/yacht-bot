@@ -14,6 +14,9 @@ class PointTable:
         for i in range(0, len(self.table)):
             self.table[i] = 0
 
+    def is_point_setable(self, point_type: PointType) -> bool:
+        return self.table_set[point_type.value] == False
+
     def set_point(self, point_type: PointType, dices: List[Dice]) -> bool:
         if self.table_set[point_type.value] is False:
             self.table[point_type.value] = 0

@@ -4,18 +4,22 @@ from Yacht.Yacht import Yacht
 
 class RobotYacht(Yacht):
     # Step description
-    # Step | Roll stage  | Play step    | Input
+    # Step | Roll stage  | Input
     # -------------------------------------------------
-    #   0  | First roll  | Hold dice    | 5 bit integer
-    #   1  | First roll  | Unhold dice  | 5 bit integer
-    #   2  | Second roll | Hold dice    | 5 bit integer
-    #   3  | Second roll | Unhold dice  | 5 bit integer
-    #   4  | Third roll  | Select score | 0~11 integer
+    #   0  | First roll  | Softmax[12] (Select scoreboard) + Softmax[5] (Select hold)
+    #   1  | Second roll | Softmax[12] (Select scoreboard) + Softmax[5] (Select hold)
+    #   2  | Third roll  | Softmax[12] (Select scoreboard) + Softmax[5] (Select hold)
     current_step: int = 0
+    select_history: list
+    hold_history: list
+    current_hold_history: list
 
     def start(self):
         self.init()
         self.current_step = 0
+        self.select_history = []
+        self.hold_history = []
+        self.current_hold_history = []
 
     def play_round(self) -> bool:
         return True
@@ -23,47 +27,51 @@ class RobotYacht(Yacht):
     def play_set_point(self) -> bool:
         return True
 
-    def play_robot_round(self, robot_input: int):
+    def play_robot_round(self, robot_input: list[float]):
         if self.rounds < 12:
             self.get_input(robot_input)
             # Update round information
-            self.current_step = (self.current_step + 1) % 5
-            if self.current_step == 0:
-                self.rounds += 1
+            self.current_step = self.current_step + 1
 
     def get_game_status(self) -> []:
-        # Build game status on list[37]
-        # round_bit[1] : integer 0 - 11
-        # step_bit[1]  : integer 0 - 4
-        # total point_bit[1] : integer 0-512
-        # point_bit[24] (MAX 50)
-        #   point [12] : bool, integer
-        # dice_bit[10] (MAX 6)
-        #   dice [5] : integer 1 - 6
+        # Game status[56] = Round(1) + Step(1) + Dices(30) + Score status(12) + Scores(12)
+        # Round: Integer = 1 - 12
+        # Step: Integer = 0 - 2
+        # Dices: Boolean[30] = Boolean[6] * 5 = [0, 0, 0, 0, 0, 0] * 5
+        # Score status: Boolean[12]
+        #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
+        # Scores: Integer[12]
+        #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
         status = []
 
-        # status_bit = rounds(4bit, 0-11) + current step(3bit, 0-4) + point(10bit, 0-1023)
-        status.append(float(self.rounds) / float(11))
-        status.append(float(self.current_step) / float(4))
-        status.append(float(self.player.get_point()) / float(500))
+        # Round: Integer = 1 - 12
+        status.append(self.rounds)
 
-        # point_bit = (point value(6bit, 0-50) + point status(1bit, 0-1)) * 12
+        # Step: Integer = 0 - 2
+        status.append(self.current_step)
+
+        # Score status: Boolean(0/1)[12]
+        #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
+        # Scores: Integer[12]
+        #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
         table = self.player.point_table
         for i in range(12):
-            status.append(float(table.table[i]) / float(50))
             if table.table_set[i]:
                 status.append(1)
             else:
                 status.append(0)
+        for i in range(12):
+            status.append(table.table[i])
 
-        # dice_bit = (dice eye(3bit, 1-6) + dice status(1bit, 0-1)) * 5
+        # Dices: Boolean(0/1)[30] = Boolean[6] * 5 = [0, 0, 0, 0, 0, 0] * 5
         for dice in range(5):
             current_dice = self.player.dices[dice]
-            status.append(float(current_dice.get_eye()) / float(6))
-            if current_dice.get_hold_state():
-                status.append(1)
-            else:
-                status.append(0)
+            for eye in range(1, 7):
+                current_eye = current_dice.get_eye()
+                if eye == current_eye:
+                    status.append(1)
+                else:
+                    status.append(0)
 
         return status
 
@@ -77,34 +85,46 @@ class RobotYacht(Yacht):
     def is_game_finish(self) -> bool:
         return self.rounds == 12
 
-    def get_input(self, robot_input: int):
+    def is_round_finish(self) -> bool:
+        return self.current_step == 3
+
+    def start_step(self):
         if self.current_step == 0:
             self.player.round_start()
-            self.__hold_dice(robot_input)
-        elif self.current_step == 1:
-            self.__unhold_dice(robot_input)
-        elif self.current_step == 2:
+        else:
             self.play_roll()
-            self.__hold_dice(robot_input)
-        elif self.current_step == 3:
-            self.__unhold_dice(robot_input)
-        elif self.current_step == 4:
-            self.play_roll()
-            self.__select_point(robot_input)
 
-    def __hold_dice(self, hold_bit: int):
+    def finish_round(self):
+        if self.current_step == 3:
+            self.current_step = 0
+            self.rounds = self.rounds + 1
+
+    def get_input(self, robot_input: list[float]):
+        current_hold = []
+        use_input = []
+        for idx in range(17):
+            use_input.append(robot_input[idx])
         for dice in range(5):
-            if (hold_bit & 0b1) == 1:
+            if use_input[12 + dice] > 0.5:
                 self.player.hold(dice)
-            hold_bit = hold_bit >> 1
-
-    def __unhold_dice(self, unhold_bit: int):
-        for dice in range(5):
-            if unhold_bit & 0b1 == 1:
+                current_hold.append(dice)
+            else:
                 self.player.un_hold(dice)
-            unhold_bit = unhold_bit >> 1
+        self.current_hold_history.append(current_hold)
+        if self.current_step == 2:
+            current_highest_score = 0
+            for score_type in range(12):
+                if self.player.is_point_setable(PointType(score_type)):
+                    if use_input[score_type] > use_input[current_highest_score]:
+                        current_highest_score = score_type
+            self.player.set_point(PointType(current_highest_score))
+            self.select_history.append(PointType(current_highest_score))
+            self.hold_history.append(self.current_hold_history)
+            self.current_hold_history = []
 
-    def __select_point(self, point_select: int):
-        point_select = point_select % 12
-        while not self.player.set_point(PointType(point_select)):
-            point_select = (point_select + 1) % 12
+    def display_game_statistics(self):
+        for round in range(12):
+            message = "Round " + str(round)\
+                      + ": Select score " + str(self.select_history[round])\
+                      + ", Hold " + str(self.hold_history[round])
+            print(message)
