@@ -37,8 +37,8 @@ class YachtAiBot:
 
     __learning_size = 1000
 
-    __play_num = 1000
-    __data_size = 10
+    __play_num = 10000
+    __data_size = 100
 
     __input_size = 56
     __output_size = 17
@@ -106,8 +106,8 @@ class YachtAiBot:
                     self.__yacht.start_step()
                     game_status = self.__yacht.get_game_status()
                     action = ai_func(game_status)
-                    game_steps.append((game_status, action[:12], action[12:]))
-                    self.__yacht.play_robot_round(action)
+                    game_action = self.__yacht.play_robot_round(action)
+                    game_steps.append((game_status, game_action[:12], game_action[12:]))
                 self.__yacht.finish_round()
 
             score = self.__yacht.get_player_point()
