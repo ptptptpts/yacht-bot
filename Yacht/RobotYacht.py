@@ -49,6 +49,16 @@ class RobotYacht(Yacht):
         # Step: Integer = 0 - 2
         status.append(self.current_step)
 
+        # Dices: Boolean(0/1)[30] = Boolean[6] * 5 = [0, 0, 0, 0, 0, 0] * 5
+        for dice in range(5):
+            current_dice = self.player.dices[dice]
+            for eye in range(1, 7):
+                current_eye = current_dice.get_eye()
+                if eye == current_eye:
+                    status.append(1)
+                else:
+                    status.append(0)
+
         # Score status: Boolean(0/1)[12]
         #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
         # Scores: Integer[12]
@@ -61,16 +71,6 @@ class RobotYacht(Yacht):
                 status.append(0)
         for i in range(12):
             status.append(table.table[i])
-
-        # Dices: Boolean(0/1)[30] = Boolean[6] * 5 = [0, 0, 0, 0, 0, 0] * 5
-        for dice in range(5):
-            current_dice = self.player.dices[dice]
-            for eye in range(1, 7):
-                current_eye = current_dice.get_eye()
-                if eye == current_eye:
-                    status.append(1)
-                else:
-                    status.append(0)
 
         return status
 
@@ -99,6 +99,11 @@ class RobotYacht(Yacht):
             self.rounds = self.rounds + 1
 
     def get_input(self, robot_input: list[float]) -> []:
+        # Input[17] = Scores[12] + Hold[5]
+        # Scores: Float[12] (0 ~ 1) Priority to select a score type
+        #    = [one, two, three, four, five, six, choice, four card, full house, small straight, large straight, yacht]
+        # Hold: Float[5] (0 ~ 1) Possibility to hold a dice
+        #    = [Dice0, Dice1, Dice2, Dice3, Dice4]
         use_input = []
         for idx in range(17):
             use_input.append(robot_input[idx])

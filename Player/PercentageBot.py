@@ -52,33 +52,26 @@ class YachtPercentageBot:
     def __run_one_round(self) -> int:
         self.__yacht.start()
         while not self.__yacht.is_game_finish():
-            for round in range(5):
-                game_status = self.__yacht.get_game_status_float()
+            while not self.__yacht.is_round_finish():
+                self.__yacht.start_step()
+
+                game_status = self.__yacht.get_game_status()
+                print(game_status)
                 dices = self.__read_dice(game_status)
-                dices_status = self.__read_dice_status(game_status)
                 point_status = self.__read_point_status(game_status)
+                next_dices_status = self.__find_max_available_point(dices, point_status)
+                selected_score_type = self.__select_max_point(dices, point_status)[0]
 
-                if round < 4:
-                    next_dices_status = self.__find_max_available_point(dices, point_status)
-                    set_hold_bit = 0
-                    unset_hold_bit = 0
+                next_input = [0, 0, 0, 0, 0, 0,
+                              0, 0, 0, 0, 0, 0,  # Score type
+                              0, 0, 0, 0, 0]  # Dice
+                next_input[selected_score_type] = 1
+                for dice in range(5):
+                    if next_dices_status[dice]:
+                        next_input[12 + dice] = 1
 
-                    for i in range(5):
-                        set_hold_bit = set_hold_bit << 1
-                        unset_hold_bit = unset_hold_bit << 1
-
-                        if next_dices_status[i]:
-                            set_hold_bit = set_hold_bit + 1
-                        else:
-                            unset_hold_bit = unset_hold_bit + 1
-
-                    self.__yacht.play_robot_round(set_hold_bit)
-                    round = round + 1
-                    self.__yacht.play_robot_round(unset_hold_bit)
-
-                else:
-                    self.__yacht.play_robot_round(self.__select_max_point(dices, point_status)[0])
-
+                self.__yacht.play_robot_round(next_input)
+            self.__yacht.finish_round()
         return self.__yacht.get_player_point()
 
     def __find_max_available_point(self, dices: List[int], point_status: List[bool]) -> []:
@@ -152,6 +145,7 @@ class YachtPercentageBot:
                             else:
                                 current_dice[4] = e
 
+                            # print(current_dice)
                             max_point = self.__select_max_point(current_dice, point_status)[1]
                             current_point_sum = current_point_sum + (float(max_point) / float(multiplier))
 
@@ -163,7 +157,7 @@ class YachtPercentageBot:
 
         point_list = self.__get_point_list(dices)
 
-        for i in range(11):
+        for i in range(12):
             if not point_status[i]:
                 if point_list[i] > max_point:
                     max_point = point_list[i]
@@ -259,26 +253,27 @@ class YachtPercentageBot:
         return point_table
 
     @staticmethod
-    def __read_dice(game_status: List[float]) -> []:
-        dices = [int(game_status[27] * 6) - 1,
-                 int(game_status[29] * 6) - 1,
-                 int(game_status[31] * 6) - 1,
-                 int(game_status[33] * 6) - 1,
-                 int(game_status[35] * 6) - 1]
+    def __read_dice(game_status: []) -> []:
+        dices = []
+        for i in range(5):
+            if game_status[2 + i * 6] == 1:  # 1
+                dices.append(0)
+            elif game_status[2 + i * 6 + 1] == 1:  # 2
+                dices.append(1)
+            elif game_status[2 + i * 6 + 2] == 1:  # 3
+                dices.append(2)
+            elif game_status[2 + i * 6 + 3] == 1:  # 4
+                dices.append(3)
+            elif game_status[2 + i * 6 + 4] == 1:  # 5
+                dices.append(4)
+            elif game_status[2 + i * 6 + 5] == 1:  # 6
+                dices.append(5)
+        print(dices)
         return dices
 
     @staticmethod
-    def __read_dice_status(game_status: List[float]) -> []:
-        dice_status = [game_status[28] == 1,
-                       game_status[30] == 1,
-                       game_status[32] == 1,
-                       game_status[34] == 1,
-                       game_status[36] == 1]
-        return dice_status
-
-    @staticmethod
-    def __read_point_status(game_status: List[float]) -> []:
-        point_status = [game_status[4] == 1, game_status[6] == 1, game_status[8] == 1, game_status[10] == 1,
-                        game_status[12] == 1, game_status[14] == 1, game_status[16] == 1, game_status[18] == 1,
-                        game_status[20] == 1, game_status[22] == 1, game_status[24] == 1, game_status[26] == 1]
+    def __read_point_status(game_status: []) -> []:
+        point_status = [game_status[32] == 1, game_status[33] == 1, game_status[34] == 1, game_status[35] == 1,
+                        game_status[36] == 1, game_status[37] == 1, game_status[38] == 1, game_status[39] == 1,
+                        game_status[40] == 1, game_status[41] == 1, game_status[42] == 1, game_status[43] == 1]
         return point_status
