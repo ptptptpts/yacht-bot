@@ -9,6 +9,7 @@ from tensorflow.keras import layers
 from keras.optimizer_v2.adam import Adam
 from tensorflow.python.client import device_lib
 
+from Player.PercentageBot import YachtPercentageBot
 from Yacht.RobotYacht import RobotYacht
 
 
@@ -37,7 +38,7 @@ class YachtAiBot:
 
     __learning_size = 1000
 
-    __play_num = 10000
+    __play_num = 1000
     __data_size = 100
 
     __input_size = 56
@@ -52,6 +53,11 @@ class YachtAiBot:
         self.__init_self()
         model = self.__build_model()
 
+        YachtPercentageBot.build_score_array()
+
+        def percentage_predictors(s):
+            return YachtPercentageBot.expect_next_input(s)
+
         def random_predictor(s):
             output = []
             for score in range(17):
@@ -65,7 +71,7 @@ class YachtAiBot:
 
         t = time.time()
         training_set = \
-            self.__data_preparation(self.__play_num, self.__data_size, random_predictor)
+            self.__data_preparation(100, 40, percentage_predictors)
         print("Execute time: " + str(time.time() - t))
         self.__train_model(model, training_set)
 

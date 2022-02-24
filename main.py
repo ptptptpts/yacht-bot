@@ -15,5 +15,5 @@ from Player.RandomBot import YachtRandomBot
 # elif select == 3:
 #     YachtAiBot().start()
 print("Start")
-YachtPercentageBot().start(10)
+# YachtPercentageBot().start(10)
 YachtAiBot().start()

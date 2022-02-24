@@ -17,7 +17,7 @@ class YachtPercentageBot:
     __score_array = []
 
     def start(self, total_run: int):
-        self.__build_score_array()
+        self.build_score_array()
         for i in range(total_run):
             print("================================")
             print("Start", i, "run")
@@ -35,7 +35,8 @@ class YachtPercentageBot:
         print("Max score: ", self.__max_score)
         print("Min score: ", self.__min_score)
 
-    def __build_score_array(self):
+    @staticmethod
+    def build_score_array():
         dices = [0, 0, 0, 0, 0]
         for a in range(6):
             dices[0] = a
@@ -47,7 +48,7 @@ class YachtPercentageBot:
                         dices[3] = d
                         for e in range(6):
                             dices[4] = e
-                            self.__score_array.append(self.__build_point_table(dices))
+                            YachtPercentageBot.__score_array.append(YachtPercentageBot.__build_point_table(dices))
 
     def __run_one_round(self) -> int:
         self.__yacht.start()
@@ -56,26 +57,31 @@ class YachtPercentageBot:
                 self.__yacht.start_step()
 
                 game_status = self.__yacht.get_game_status()
-                print(game_status)
-                dices = self.__read_dice(game_status)
-                point_status = self.__read_point_status(game_status)
-                next_dices_status = self.__find_max_available_point(dices, point_status)
-                selected_score_type = self.__select_max_point(dices, point_status)[0]
-
-                next_input = [0, 0, 0, 0, 0, 0,
-                              0, 0, 0, 0, 0, 0,  # Score type
-                              0, 0, 0, 0, 0]  # Dice
-                next_input[selected_score_type] = 1
-                for dice in range(5):
-                    if next_dices_status[dice]:
-                        next_input[12 + dice] = 1
+                next_input = self.expect_next_input(game_status)
 
                 self.__yacht.play_robot_round(next_input)
             self.__yacht.finish_round()
+            print("--------")
         return self.__yacht.get_player_point()
 
-    def __find_max_available_point(self, dices: List[int], point_status: List[bool]) -> []:
-        current_max = self.__select_max_point(dices, point_status)[1]
+    @staticmethod
+    def expect_next_input(game_status):
+        dices = YachtPercentageBot.__read_dice(game_status)
+        point_status = YachtPercentageBot.__read_point_status(game_status)
+        next_dices_status = YachtPercentageBot.__find_max_available_point(dices, point_status)
+        selected_score_type = YachtPercentageBot.__select_max_point(dices, point_status)[0]
+        next_input = [0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0,  # Score type
+                      0, 0, 0, 0, 0]  # Dice
+        next_input[selected_score_type] = 1
+        for dice in range(5):
+            if next_dices_status[dice]:
+                next_input[12 + dice] = 1
+        return next_input
+
+    @staticmethod
+    def __find_max_available_point(dices: List[int], point_status: List[bool]) -> []:
+        current_max = YachtPercentageBot.__select_max_point(dices, point_status)[1]
         is_hold_dice = [False, False, False, False, False]
         current_max_state = [False, False, False, False, False]
 
@@ -92,7 +98,7 @@ class YachtPercentageBot:
                                 break
                             is_hold_dice[4] = e_hold == 1
 
-                            expected_point = self.__get_expected_point(dices, is_hold_dice, point_status)
+                            expected_point = YachtPercentageBot.__get_expected_point(dices, is_hold_dice, point_status)
 
                             if expected_point > current_max:
                                 current_max = expected_point
@@ -101,7 +107,8 @@ class YachtPercentageBot:
 
         return current_max_state
 
-    def __get_expected_point(self, dices, is_hold_dice, point_status):
+    @staticmethod
+    def __get_expected_point(dices, is_hold_dice, point_status):
         current_dice = [0, 0, 0, 0, 0]
         multiplier = 1
         current_point_sum = 0
@@ -145,17 +152,17 @@ class YachtPercentageBot:
                             else:
                                 current_dice[4] = e
 
-                            # print(current_dice)
-                            max_point = self.__select_max_point(current_dice, point_status)[1]
+                            max_point = YachtPercentageBot.__select_max_point(current_dice, point_status)[1]
                             current_point_sum = current_point_sum + (float(max_point) / float(multiplier))
 
         return current_point_sum
 
-    def __select_max_point(self, dices: List[int], point_status: List[bool]) -> []:
+    @staticmethod
+    def __select_max_point(dices: List[int], point_status: List[bool]) -> []:
         max_point = 0
         max_type = 0
 
-        point_list = self.__get_point_list(dices)
+        point_list = YachtPercentageBot.__get_point_list(dices)
 
         for i in range(12):
             if not point_status[i]:
@@ -165,11 +172,12 @@ class YachtPercentageBot:
 
         return [max_type, max_point]
 
-    def __get_point_list(self, dices):
+    @staticmethod
+    def __get_point_list(dices):
         dice_pos = 0
         for i in range(5):
             dice_pos = dice_pos * 6 + dices[i]
-        point_list = self.__score_array[dice_pos]
+        point_list = YachtPercentageBot.__score_array[dice_pos]
         return point_list
 
     @staticmethod
